@@ -1,0 +1,16 @@
+server:
+  host: localhost
+  port: 6372
+jobs:
+  bash_example:
+    name: Example Bash Job
+    cron: "*/3 * * * * *"
+    cmd: ./bash_example.sh
+  python_example:
+    name: Example Python Job
+    cron: "*/7 * * * * *"
+    cmd: ./python_example.py
+  go_example:
+    name: Example Go Job
+    cron: "*/5 * * * * *"
+    cmd: ./go_example.go
