@@ -1,3 +1,3 @@
 ## Cronic Scheduler (WIP)
 
-`go run main.go examples/`
+`go run . examples/`
