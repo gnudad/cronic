@@ -2,20 +2,18 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
+	"log"
 )
 
 func main() {
 	cronic := NewCronic()
-	fmt.Println("Running cronic from ", cronic.path)
+	fmt.Println("Running cronic from", cronic.Path)
+	cronic.Scheduler.Start()
 
-	for key, job := range cronic.config.Jobs {
-		fmt.Printf("%s (%s): %s\n", key, job.Name, job.Cmd)
-		cmd := exec.Command("sh", "-c", job.Cmd)
-		cmd.Stdout = os.Stdout
-		if err := cmd.Run(); err != nil {
-			panic(err)
-		}
+	log.Fatal(cronic.Server.ListenAndServe())
+
+	err := cronic.Scheduler.Shutdown()
+	if err != nil {
+		panic(err)
 	}
 }

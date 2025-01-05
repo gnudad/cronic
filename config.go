@@ -1,7 +1,11 @@
 package main
 
-import "os"
-import "github.com/goccy/go-yaml"
+import (
+	"os"
+
+	"github.com/goccy/go-yaml"
+	"github.com/google/uuid"
+)
 
 type Server struct {
 	Host string
@@ -9,9 +13,10 @@ type Server struct {
 }
 
 type Job struct {
-	Name string
-	Cron string
-	Cmd  string
+	Name  string
+	Cron  string
+	Cmd   string
+	JobID uuid.UUID
 }
 
 type Config struct {
