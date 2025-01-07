@@ -13,11 +13,11 @@ import (
 
 func main() {
 	cronic := NewCronic()
-	fmt.Println("Running cronic from", cronic.Path)
-	cronic.Scheduler.Start()
+	fmt.Println("Running cronic from", cronic.path)
+	cronic.scheduler.Start()
 
 	go func() {
-		if err := cronic.Server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+		if err := cronic.Server.httpServer.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 			panic(err)
 		}
 		fmt.Println("Shutting down web server...")
@@ -27,16 +27,16 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
-	defer shutdownRelease()
-
-	err := cronic.Scheduler.Shutdown()
+	err := cronic.scheduler.Shutdown()
 	if err != nil {
 		panic(err)
 	}
 
-	if err := cronic.Server.Shutdown(shutdownCtx); err != nil {
+	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownRelease()
+	if err := cronic.Server.httpServer.Shutdown(shutdownCtx); err != nil {
 		panic(fmt.Errorf("HTTP shutdown error: %v", err))
 	}
+
 	fmt.Println("Graceful shutdown complete.")
 }

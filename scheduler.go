@@ -1,35 +1,24 @@
 package main
 
 import (
-	"fmt"
-	"os/exec"
-
 	"github.com/go-co-op/gocron/v2"
 )
 
-func LoadScheduler(config Config) gocron.Scheduler {
+func NewScheduler(cronic *Cronic) gocron.Scheduler {
 	s, err := gocron.NewScheduler()
 	if err != nil {
 		panic(err)
 	}
-
-	for _, job := range config.Jobs {
+	for key, job := range cronic.Jobs {
+		job.key = key
 		j, err := s.NewJob(
-			gocron.CronJob(job.Cron, true),
-			gocron.NewTask(
-				func() {
-					out, err := exec.Command("sh", "-c", job.Cmd).Output()
-					if err != nil {
-						panic(err)
-					}
-					fmt.Print(string(out))
-				},
-			),
+			job.JobDefinition(),
+			job.Task(),
 		)
 		if err != nil {
 			panic(err)
 		}
-		job.JobID = j.ID()
+		job.jobID = j.ID()
 	}
 	return s
 }

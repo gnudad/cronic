@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 
@@ -10,10 +9,10 @@ import (
 )
 
 type Cronic struct {
-	Path      string
-	Config    Config
-	Scheduler gocron.Scheduler
-	Server    *http.Server
+	path      string
+	scheduler gocron.Scheduler
+	Server    Server
+	Jobs      map[string]Job
 }
 
 func NewCronic() Cronic {
@@ -31,19 +30,23 @@ func NewCronic() Cronic {
 		if !info.IsDir() {
 			panic(fmt.Errorf("Path is not a directory: %s", path))
 		}
-		cronic.Path = path
+		cronic.path = path
 	} else {
 		path, err := filepath.Abs(".")
 		if err != nil {
 			panic(err)
 		}
-		cronic.Path = path
+		cronic.path = path
 	}
-	if err := os.Chdir(cronic.Path); err != nil {
+	if err := os.Chdir(cronic.path); err != nil {
 		panic(err)
 	}
-	cronic.Config = LoadConfig()
-	cronic.Scheduler = LoadScheduler(cronic.Config)
-	cronic.Server = NewServer(cronic.Config)
+	if err := LoadConfig(&cronic); err != nil {
+		panic(err)
+	}
+	cronic.scheduler = NewScheduler(&cronic)
+	if err := InitServer(&cronic); err != nil {
+		panic(err)
+	}
 	return cronic
 }

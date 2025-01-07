@@ -4,42 +4,25 @@ import (
 	"os"
 
 	"github.com/goccy/go-yaml"
-	"github.com/google/uuid"
 )
 
-type Server struct {
-	Host string
-	Port int
-}
-
-type Job struct {
-	Name  string
-	Cron  string
-	Cmd   string
-	JobID uuid.UUID
-}
-
-type Config struct {
-	Server Server
-	Jobs   map[string]Job
-}
-
-func LoadConfig() Config {
-	var config Config
+func LoadConfig(cronic *Cronic) error {
 	data, err := os.ReadFile("cronic.yaml")
 	if err != nil {
 		panic(err)
 	}
-	if err := yaml.Unmarshal(data, &config); err != nil {
-		panic(err)
+	if err := yaml.Unmarshal(data, cronic); err != nil {
+		return err
+	}
+	yamlData, err := yaml.MarshalWithOptions(cronic, yaml.IndentSequence(true))
+	if err != nil {
+		return err
 	}
 
-	yamlData, err := yaml.MarshalWithOptions(&config, yaml.IndentSequence(true))
-	if err != nil {
-		panic(err)
-	}
+	// Write it back to another file for now to see if/how it changes
 	if err := os.WriteFile("cronic2.yaml", yamlData, 0600); err != nil {
-		panic(err)
+		return err
 	}
-	return config
+
+	return nil
 }
