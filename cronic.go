@@ -45,8 +45,5 @@ func NewCronic() Cronic {
 		panic(err)
 	}
 	cronic.scheduler = NewScheduler(&cronic)
-	if err := InitServer(&cronic); err != nil {
-		panic(err)
-	}
 	return cronic
 }
