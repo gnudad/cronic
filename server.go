@@ -1,46 +1,19 @@
 package main
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"io"
 	"net/http"
-	"time"
+
+	"github.com/labstack/echo/v4"
 )
 
-type Server struct {
-	Host       string
-	Port       int
-	httpServer *http.Server
-}
+func NewServer(cronic *Cronic) *echo.Echo {
+	e := echo.New()
+	e.HideBanner = true
+	e.HidePort = true
 
-func (s *Server) Start() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		time.Sleep(5 * time.Second)
-		_, err := io.WriteString(w, "Cronic Scheulder")
-		if err != nil {
-			panic(err)
-		}
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Cronic Scheduler")
 	})
-	s.httpServer = &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", s.Host, s.Port),
-		Handler: mux,
-	}
-	go func() {
-		if err := s.httpServer.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
-			panic(err)
-		}
-		fmt.Println("Shutting down web server...")
-	}()
-}
 
-func (s *Server) Shutdown() {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	if err := s.httpServer.Shutdown(ctx); err != nil {
-		panic(err)
-	}
-	fmt.Println("Web server shut down gracefully.")
+	return e
 }

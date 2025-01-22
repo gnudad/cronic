@@ -6,6 +6,11 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
+type Config struct {
+	Host string
+	Port int
+}
+
 func LoadConfig(cronic *Cronic) error {
 	data, err := os.ReadFile("cronic.yaml")
 	if err != nil {
